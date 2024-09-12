@@ -1,13 +1,27 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-php
     container_name: laravel_app
     volumes:
-      - .:/var/www
-    ports:
-      - "8000:9000"
+      - .:/var/www/html
+    expose:
+      - "9000" # Exponemos el puerto 9000 solo a otros contenedores, no al host
     depends_on:
       - db
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    container_name: nginx_server
+    ports:
+      - "8000:80" # Mapeamos el puerto 80 del contenedor al 8000 del host
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - app
 
   db:
     image: mysql:5.7

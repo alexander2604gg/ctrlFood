@@ -1,0 +1,39 @@
+# Usa una imagen base con PHP y extensiones necesarias
+FROM php:7.3-fpm
+
+# Instala dependencias y extensiones PHP necesarias
+RUN apt-get update && \
+    apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev libzip-dev git unzip libonig-dev && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install gd zip pdo pdo_mysql && \
+    pecl install xdebug && \
+    docker-php-ext-enable xdebug
+
+# Configura el directorio de trabajo
+WORKDIR /var/www
+
+# Copia los archivos del proyecto al contenedor
+COPY . .
+
+# Instala Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Instala las dependencias de PHP usando Composer
+RUN composer install --no-scripts --no-autoloader
+
+# Instala Node.js y npm
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g npm@latest
+
+# Instala las dependencias de JavaScript usando npm
+RUN npm install
+
+# Ejecuta la construcción de assets de Laravel
+RUN npm run prod
+
+# Expone el puerto 9000 para PHP-FPM
+EXPOSE 9000
+
+# Comando para ejecutar el servidor PHP-FPM
+CMD ["php-fpm"]
