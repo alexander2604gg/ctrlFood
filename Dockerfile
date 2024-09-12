@@ -36,7 +36,6 @@ RUN pecl channel-update pecl.php.net && \
 RUN npm run prod
 
 # Expone el puerto 9000 para PHP-FPM
-EXPOSE 9000
+EXPOSE 10000
 
-# Comando para ejecutar el servidor PHP-FPM
 CMD ["php-fpm"]
